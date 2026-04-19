@@ -2,7 +2,7 @@
   "name": "Diadem Racket Demo",
   "short_name": "Racket Demo",
   "description": "Tournament racket demo checkout and return tracker",
-  "start_url": "./Diadem Racket Demo Tracker.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#f4f6f8",

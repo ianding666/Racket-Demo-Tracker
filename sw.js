@@ -1,6 +1,6 @@
 const CACHE = 'racket-demo-v1';
 const ASSETS = [
-  './Diadem Racket Demo Tracker.html',
+  './index.html',
   './manifest.json'
 ];
 
