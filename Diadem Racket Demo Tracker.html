@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diadem Racket Demo</title>
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Racket Demo" />
+  <meta name="theme-color" content="#008c95" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 80'%3E%3Cg fill='%23008c95'%3E%3Cpolygon points='50,2 61,35 50,68 39,35'/%3E%3Cpolygon points='25,14 36,42 28,66 17,38'/%3E%3Cpolygon points='75,14 83,38 72,66 64,42'/%3E%3C/g%3E%3C/svg%3E" type="image/svg+xml" />
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:   #008c95;
+      --green-lt:#00a8b3;
+      --red:     #c62828;
+      --red-lt:  #e53935;
+      --blue:    #1565c0;
+      --blue-lt: #1e88e5;
+      --bg:      #f4f6f8;
+      --card:    #ffffff;
+      --border:  #dde1e7;
+      --text:    #1a1a2e;
+      --muted:   #6b7280;
+      --radius:  12px;
+      --shadow:  0 2px 12px rgba(0,0,0,.09);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 17px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ── Layout ── */
+    .page { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+    header {
+      background: #fff;
+      color: var(--text);
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    header .logo { font-size: 2rem; }
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: .3px; }
+    header p  { font-size: .9rem; opacity: .85; margin-top: 2px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ── Form ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label {
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .form-group input,
+    .form-group select {
+      padding: 13px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 1rem;
+      color: var(--text);
+      background: #fafbfc;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+    }
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--green-lt);
+      background: #fff;
+    }
+    .form-group input::placeholder { color: #b0b8c4; }
+
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 9px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      min-height: 48px;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-green  { background: var(--green); color: #fff; }
+    .btn-green:hover { background: var(--green-lt); }
+    .btn-red    { background: var(--red); color: #fff; font-size: .85rem; padding: 10px 16px; }
+    .btn-red:hover { background: var(--red-lt); }
+    .btn-blue   { background: var(--blue); color: #fff; }
+    .btn-blue:hover { background: var(--blue-lt); }
+    .btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1.5px solid var(--border);
+      font-size: .9rem;
+      padding: 10px 18px;
+    }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid var(--red);
+      font-size: .85rem;
+      padding: 8px 14px;
+      min-height: 40px;
+    }
+    .btn-danger:hover { background: #fdecea; }
+    .btn-delete-mode {
+      background: transparent;
+      color: var(--red);
+      border: 1.5px solid var(--red);
+      font-size: .82rem;
+      padding: 7px 14px;
+      min-height: 36px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-delete-mode:hover { background: #fdecea; }
+    .btn-delete-mode.active {
+      background: var(--red);
+      color: #fff;
+    }
+    .btn-delete-mode.active:hover { background: var(--red-lt); }
+
+    /* delete mode row highlight */
+    tr.dm-selected td { background: #fdecea !important; }
+    td.dm-check { width: 40px; text-align: center; }
+    td.dm-check input[type=checkbox],
+    th.dm-check input[type=checkbox] {
+      width: 20px; height: 20px; cursor: pointer; accent-color: var(--red);
+    }
+    th.dm-check { width: 40px; text-align: center; }
+
+    /* delete action bar */
+    .delete-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: #fdecea;
+      border: 1.5px solid #f5c2c7;
+      border-radius: 9px;
+      flex-wrap: wrap;
+    }
+    .delete-bar span { font-size: .93rem; color: var(--red); font-weight: 600; flex: 1; }
+    .delete-bar .btn { min-height: 40px; font-size: .88rem; padding: 9px 18px; }
+
+    .form-actions {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ── Summary strip ── */
+    .summary {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+    .stat {
+      flex: 1;
+      min-width: 120px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-num  { font-size: 2rem; font-weight: 800; color: var(--green); line-height: 1; }
+    .stat-label { font-size: .78rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+    thead tr { background: #f0f4f0; }
+    th {
+      text-align: left;
+      padding: 11px 13px;
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      border-bottom: 2px solid var(--border);
+    }
+    td {
+      padding: 12px 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #f9fbf9; }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    .badge-out      { background: #fff3cd; color: #856404; }
+    .badge-returned { background: #d1e7dd; color: #0a3622; }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 32px;
+      font-size: .95rem;
+    }
+
+    /* ── History toggle ── */
+    .section-toggle {
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 0;
+    }
+    .section-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .section-toggle .chevron {
+      font-size: .8rem;
+      transition: transform .2s;
+      color: var(--muted);
+    }
+    .section-toggle.open .chevron { transform: rotate(180deg); }
+    #history-body-wrap { margin-top: 16px; }
+
+    /* ── Confirm overlay ── */
+    /* ── Toast notification ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1a1a2e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 99px;
+      font-size: .92rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      z-index: 1000;
+      white-space: nowrap;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Responsive tweaks ── */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.2rem; }
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      td, th { padding: 10px 8px; font-size: .82rem; }
+      .btn { padding: 12px 16px; font-size: .95rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <header>
+    <img src="https://lh3.googleusercontent.com/d/1kmXRwSM-LoBNXbtElLNX4QKDa2rrcg1r" alt="Diadem" style="height:56px;width:auto;display:block" />
+    <h1 style="font-size:1.4rem;font-weight:700;color:var(--text)">Diadem Racket Demo</h1>
+  </header>
+
+  <!-- Stats -->
+  <!--
+  <div class="summary">
+    <div class="stat">
+      <div class="stat-num" id="stat-out">0</div>
+      <div class="stat-label">Out Now</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Total Checkouts</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-returned">0</div>
+      <div class="stat-label">Returned</div>
+    </div>
+  </div>
+  -->
+
+  <!-- Checkout Form -->
+  <div class="card">
+    <div class="card-title">🏷️ New Checkout</div>
+    <form id="checkout-form" onsubmit="submitCheckout(event)">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="player-name">Full Name</label>
+          <input id="player-name" type="text" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input id="phone" type="tel" required autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="racket">Racket Model</label>
+          <select id="racket" required>
+            <option value="" disabled selected></option>
+            <option>Axis 98</option>
+            <option>Axis 100</option>
+            <option>Axis Team</option>
+            <option>Nova Tour</option>
+            <option>Nova 100</option>
+            <option>Nova Team</option>
+            <option>Nova Lite</option>
+            <option>Elevate Tour</option>
+            <option>Elevate 98</option>
+            <option>Elevate Lite</option>
+            <option>Dream 105</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="court">Court</label>
+          <input id="court" type="text" required autocomplete="off" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-green">✔ Check Out Racket</button>
+        <button type="button" class="btn btn-outline" onclick="clearForm()">Clear</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Active Checkouts -->
+  <div class="card">
+    <div class="card-title">
+      <span>🎾 Active Checkouts</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr id="active-thead-row">
+            <th>#</th>
+            <th>Player</th>
+            <th>Phone</th>
+            <th>Racket</th>
+            <th>Court</th>
+            <th>Time Out</th>
+            <th>Duration</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="active-tbody"></tbody>
+      </table>
+    </div>
+    <div id="active-empty" class="empty-state" style="display:none">No rackets currently checked out.</div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="card-title section-toggle" id="history-toggle" onclick="toggleHistory()">
+      <span>📋 Demo History</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div id="history-body-wrap" style="display:none">
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:10px">
+        <button class="btn" style="background:var(--green);color:#fff;font-size:.82rem;padding:7px 14px;min-height:36px;border-radius:8px;font-weight:700" onclick="exportCSV()">⬇ Export CSV</button>
+        <button class="btn-delete-mode" id="dm-toggle-history" onclick="toggleEditMode()">✏️ Edit Mode</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th>Phone</th>
+              <th>Racket</th>
+              <th>Court</th>
+              <th>Time Out</th>
+              <th>Time In</th>
+              <th>Duration</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+      <div id="history-empty" class="empty-state" style="display:none">No returned rackets yet.</div>
+
+      <div class="delete-bar" id="history-delete-bar" style="display:none">
+        <span id="history-delete-count">0 selected</span>
+        <button class="btn btn-outline" onclick="toggleEditMode()">Cancel</button>
+        <button class="btn btn-outline" style="color:var(--green);border-color:var(--green)" onclick="undoSelected()">↩ Undo Return</button>
+        <button class="btn btn-red" onclick="deleteSelected('history')">🗑 Delete</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+  // ── Storage ───────────────────────────────────────────────────────────────
+  const STORAGE_KEY = 'racket_demo_entries';
+
+  function loadEntries() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveEntries(entries) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }
+
+  // ── Time helpers ──────────────────────────────────────────────────────────
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString([], {month:'short', day:'numeric'})
+      + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+
+  function duration(fromISO, toISO) {
+    const from = new Date(fromISO);
+    const to   = toISO ? new Date(toISO) : new Date();
+    const mins = Math.max(0, Math.floor((to - from) / 60000));
+    if (mins < 60) return mins + 'm';
+    return Math.floor(mins/60) + 'h ' + (mins%60) + 'm';
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── Edit mode state ────────────────────────────────────────────────────
+  const dmState = { active: false, history: false };
+
+  function toggleEditMode() {
+    const section = 'history';
+    dmState[section] = !dmState[section];
+    const btn = document.getElementById('dm-toggle-history');
+    btn.classList.toggle('active', dmState[section]);
+    btn.textContent = dmState[section] ? '✕ Cancel' : '✏️ Edit Mode';
+    document.getElementById('history-delete-bar').style.display = dmState[section] ? '' : 'none';
+    updateDeleteCount(section);
+    render();
+  }
+
+  function exitEditMode() {
+    dmState.history = false;
+    const btn = document.getElementById('dm-toggle-history');
+    if (btn) { btn.classList.remove('active'); btn.textContent = '✏️ Edit Mode'; }
+    const bar = document.getElementById('history-delete-bar');
+    if (bar) bar.style.display = 'none';
+    render();
+  }
+
+  function updateDeleteCount(section) {
+    const checks = document.querySelectorAll(`#${section === 'active' ? 'active' : 'history'}-tbody input[type=checkbox]:checked`);
+    const el = document.getElementById(`${section}-delete-count`);
+    if (el) el.textContent = `${checks.length} selected`;
+  }
+
+  function deleteSelected(section) {
+    const tbody = document.getElementById(`${section === 'active' ? 'active' : 'history'}-tbody`);
+    const checked = [...tbody.querySelectorAll('input[type=checkbox]:checked')];
+    if (!checked.length) { showToast('No rows selected.'); return; }
+    const ids = checked.map(cb => cb.dataset.id);
+    const entries = loadEntries();
+    saveEntries(entries.filter(e => !ids.includes(e.id)));
+    showToast(`🗑 ${ids.length} entr${ids.length > 1 ? 'ies' : 'y'} deleted`);
+    exitEditMode();
+  }
+
+  function undoSelected() {
+    const tbody = document.getElementById('history-tbody');
+    const checked = [...tbody.querySelectorAll('input[type=checkbox]:checked')];
+    if (!checked.length) { showToast('No rows selected.'); return; }
+    const ids = checked.map(cb => cb.dataset.id);
+    const entries = loadEntries();
+    entries.forEach(e => { if (ids.includes(e.id)) e.returnedAt = null; });
+    saveEntries(entries);
+    showToast(`↩ ${ids.length} racket${ids.length > 1 ? 's' : ''} moved back to active`);
+    exitEditMode();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function render() {
+    const entries = loadEntries();
+    const active  = entries.filter(e => !e.returnedAt);
+    const history = entries.filter(e =>  e.returnedAt);
+
+    // Stats (elements may be commented out)
+    const elOut = document.getElementById('stat-out');
+    const elTotal = document.getElementById('stat-total');
+    const elReturned = document.getElementById('stat-returned');
+    if (elOut) elOut.textContent = active.length;
+    if (elTotal) elTotal.textContent = entries.length;
+    if (elReturned) elReturned.textContent = history.length;
+
+    // Active table
+    const atbody = document.getElementById('active-tbody');
+    atbody.innerHTML = '';
+    const activeEmpty = document.getElementById('active-empty');
+    activeEmpty.style.display = active.length ? 'none' : '';
+
+    // remove dm-check header cell if somehow present
+    const activeTheadRow = document.getElementById('active-thead-row');
+    const staleChTh = activeTheadRow && activeTheadRow.querySelector('th.dm-check');
+    if (staleChTh) staleChTh.remove();
+
+    active.forEach((e, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td><strong>${esc(e.player)}</strong></td>
+        <td>${esc(e.phone)}</td>
+        <td>${esc(e.racket)}</td>
+        <td>${esc(e.court)}</td>
+        <td>${fmtDate(e.checkedOutAt)}</td>
+        <td id="dur-${e.id}">${duration(e.checkedOutAt)}</td>
+        <td><button class="btn btn-green" onclick="returnRacket('${e.id}')">↩ Return</button></td>
+      `;
+      atbody.appendChild(tr);
+    });
+
+    // History table
+    const htbody = document.getElementById('history-tbody');
+    htbody.innerHTML = '';
+    document.getElementById('history-empty').style.display = history.length ? 'none' : '';
+
+    // manage checkbox header cell for history
+    const histTheadRow = document.querySelector('#history-tbody')?.closest('table')?.querySelector('thead tr');
+    if (histTheadRow) {
+      let histChTh = histTheadRow.querySelector('th.dm-check');
+      if (dmState.history && !histChTh) {
+        histChTh = document.createElement('th');
+        histChTh.className = 'dm-check';
+        histChTh.innerHTML = '<input type="checkbox" title="Select all" onchange="toggleSelectAll(\'history\',this.checked)">';
+        histTheadRow.prepend(histChTh);
+      } else if (!dmState.history && histChTh) {
+        histChTh.remove();
+      }
+    }
+
+    [...history].reverse().forEach((e, i) => {
+      const tr = document.createElement('tr');
+      const checkCell = dmState.history
+        ? `<td class="dm-check"><input type="checkbox" data-id="${e.id}" onchange="this.closest('tr').classList.toggle('dm-selected',this.checked);updateDeleteCount('history')"></td>`
+        : '';
+      tr.innerHTML = `
+        ${checkCell}
+        <td>${history.length - i}</td>
+        <td>${esc(e.player)}</td>
+        <td>${esc(e.phone)}</td>
+        <td>${esc(e.racket)}</td>
+        <td>${esc(e.court)}</td>
+        <td>${fmtDate(e.checkedOutAt)}</td>
+        <td>${fmtDate(e.returnedAt)}</td>
+        <td>${duration(e.checkedOutAt, e.returnedAt)}</td>
+      `;
+      htbody.appendChild(tr);
+    });
+    if (dmState.history) updateDeleteCount('history');
+  }
+
+  function esc(str) {
+    return String(str ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  // ── Checkout ──────────────────────────────────────────────────────────────
+  function submitCheckout(e) {
+    e.preventDefault();
+    const entries = loadEntries();
+    const racketVal = document.getElementById('racket').value.trim();
+    const entry = {
+      id:           uid(),
+      player:       document.getElementById('player-name').value.trim(),
+      phone:        document.getElementById('phone').value.trim(),
+      racket:       racketVal,
+      court:        document.getElementById('court').value.trim(),
+      checkedOutAt: new Date().toISOString(),
+      returnedAt:   null,
+    };
+    entries.push(entry);
+    saveEntries(entries);
+    render();
+    showToast(`✔ ${entry.player} — ${entry.racket} checked out`);
+    // Reset form (racket dropdown resets to default for next entry)
+    document.getElementById('checkout-form').reset();
+    document.getElementById('player-name').focus();
+  }
+
+  function clearForm() {
+    document.getElementById('checkout-form').reset();
+    document.getElementById('player-name').focus();
+  }
+
+  // ── Select all helper ────────────────────────────────────────────────────
+  function toggleSelectAll(section, checked) {
+    const tbody = document.getElementById(`${section === 'active' ? 'active' : 'history'}-tbody`);
+    tbody.querySelectorAll('input[type=checkbox]').forEach(cb => {
+      cb.checked = checked;
+      cb.closest('tr').classList.toggle('dm-selected', checked);
+    });
+    updateDeleteCount(section);
+  }
+
+  // ── Delete entry (legacy single, kept for safety) ─────────────────────────
+  function deleteEntry(id) {
+    const entries = loadEntries();
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    saveEntries(entries.filter(e => e.id !== id));
+    render();
+    showToast(`🗑 ${entry.racket} — ${entry.player} deleted`);
+  }
+
+  // ── Undo Return ───────────────────────────────────────────────────────────
+  function undoReturn(id) {
+    const entries = loadEntries();
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    entry.returnedAt = null;
+    saveEntries(entries);
+    render();
+    showToast(`↺ Return undone — ${entry.racket} is active again`);
+  }
+
+  // ── Return ─────────────────────────────────────────────────────────────────────
+  function returnRacket(id) {
+    const entries = loadEntries();
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    entry.returnedAt = new Date().toISOString();
+    saveEntries(entries);
+    render();
+    showToast(`↩ ${entry.racket} returned — ${entry.player}`);
+  }
+
+  // ── History toggle ────────────────────────────────────────────────────────
+  function toggleHistory() {
+    const wrap   = document.getElementById('history-body-wrap');
+    const toggle = document.getElementById('history-toggle');
+    const isOpen = wrap.style.display !== 'none';
+    wrap.style.display = isOpen ? 'none' : '';
+    toggle.classList.toggle('open', !isOpen);
+  }
+
+  // ── Export CSV ────────────────────────────────────────────────────────────
+  function exportCSV() {
+    const entries = loadEntries();
+    if (!entries.length) { showToast('No entries to export yet.'); return; }
+
+    const cols = ['#','Player','Phone','Racket','Court','Checked Out','Returned','Duration (min)'];
+    const rows = entries.map((e, i) => {
+      const from = new Date(e.checkedOutAt);
+      const to   = e.returnedAt ? new Date(e.returnedAt) : '';
+      const mins = to ? Math.floor((to - from) / 60000) : '';
+      return [
+        i+1, e.player, e.phone, e.racket, e.court,
+        fmtDate(e.checkedOutAt),
+        e.returnedAt ? fmtDate(e.returnedAt) : 'Still Out',
+        mins,
+      ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+    });
+
+    const csv  = [cols.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `racket-demo-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('CSV downloaded!');
+  }
+
+  // ── Live duration ticker ──────────────────────────────────────────────────
+  function tickDurations() {
+    const entries = loadEntries();
+    entries.filter(e => !e.returnedAt).forEach(e => {
+      const el = document.getElementById(`dur-${e.id}`);
+      if (el) el.textContent = duration(e.checkedOutAt);
+    });
+  }
+
+  // ── Service Worker registration ─────────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () =>
+      navigator.serviceWorker.register('./sw.js')
+    );
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  render();
+  setInterval(tickDurations, 30000);
+</script>
+</body>
+</html>
